@@ -1,6 +1,3 @@
-# Prerequisites
-*.d
-
 # Compiled Object files
 *.slo
 *.lo
@@ -26,7 +23,16 @@
 *.a
 *.lib
 
+# VS debug files
+*.ilk
+*.pdb
+
+# binary output folders
+out
+
 # Executables
 *.exe
 *.out
 *.app
+day17/.vscode/bookmarks.json
+day18/.vscode/bookmarks.json
