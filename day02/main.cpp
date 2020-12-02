@@ -22,7 +22,8 @@ class AoC2020_day02 : public AoC {
 
   private:
 	bool is_rule_valid(const password_rule& rule);
-	uint32_t get_valid_password_rules_count();
+	bool is_rule_valid_part2(const password_rule& rule);
+	uint32_t get_valid_password_rules_count(const bool part1);
 	std::vector<password_rule> rules_;
 };
 
@@ -70,12 +71,26 @@ bool AoC2020_day02::is_rule_valid(const password_rule& rule) {
 	}
 }
 
-uint32_t AoC2020_day02::get_valid_password_rules_count() {
+bool AoC2020_day02::is_rule_valid_part2(const password_rule& rule) {
+	bool c1, c2;
+
+	c1 = rule.password[rule.min - 1] == rule.chr;
+	c2 = rule.password[rule.max - 1] == rule.chr;
+
+	return (c1 != c2);
+}
+
+uint32_t AoC2020_day02::get_valid_password_rules_count(const bool part1) {
 	uint32_t result = 0;
-	for (size_t i = 0; i < rules_.size(); i++)
-	{
-		if (is_rule_valid(rules_[i])) {
-			result++;
+	for (size_t i = 0; i < rules_.size(); i++) {
+		if (part1) {
+			if (is_rule_valid(rules_[i])) {
+				result++;
+			}
+		} else {
+			if (is_rule_valid_part2(rules_[i])) {
+				result++;
+			}
 		}
 	}
 
@@ -86,21 +101,23 @@ void AoC2020_day02::tests() {
 	uint32_t result;
 
 	if (init({"1-3 a: abcde", "1-3 b: cdefg", "2-9 c: ccccccccc"})) {
-		result = get_valid_password_rules_count(); // 2
+		result = get_valid_password_rules_count(true); // 2
+		result = get_valid_password_rules_count(false); // 1
 	}
 }
 
 bool AoC2020_day02::part1() {
 
-	result1_ = std::to_string(get_valid_password_rules_count());
+	result1_ = std::to_string(get_valid_password_rules_count(true));
 
 	return true;
 }
 
 bool AoC2020_day02::part2() {
-	uint32_t result = 0;
 
-	return false;
+	result2_ = std::to_string(get_valid_password_rules_count(false));
+
+	return true;
 }
 
 int32_t AoC2020_day02::get_aoc_day() {
