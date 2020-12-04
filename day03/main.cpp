@@ -11,7 +11,7 @@ class AoC2020_day03 : public AoC {
 	int32_t get_aoc_year();
 
   private:
-	uint32_t get_tree_count_by_3_1_slope();
+	uint32_t get_tree_count_by_slopes(const bool part2);
 	std::vector<std::string> map_;
 };
 
@@ -36,14 +36,36 @@ bool AoC2020_day03::init(const std::vector<std::string> lines) {
 	return true;
 }
 
-uint32_t AoC2020_day03::get_tree_count_by_3_1_slope() {
-	uint32_t result = 0, maxx = map_[0].size(), maxy = map_.size(), x = 0;
+uint32_t AoC2020_day03::get_tree_count_by_slopes(const bool part2) {
+	uint32_t result, maxx = map_[0].size(), maxy = map_.size(), x, y;
+	std::vector<std::pair<uint32_t, uint32_t>> slopes;
+	std::vector<uint32_t> sums{};
 
-	for (uint32_t y = 0; y < maxy; y++) {
-		if (map_[y][x % maxx] == '#') {
-			result++;
+	if (part2) {
+		slopes = {{1, 1}, {3, 1}, {5, 1}, {7, 1}, {1, 2}};
+	} else {
+		slopes = {{3, 1}};
+	}
+
+	for (size_t i = 0; i < slopes.size(); i++) {
+
+		x = y = result = 0;
+
+		while (y < maxy) {
+			if (map_[y][x % maxx] == '#') {
+				result++;
+			}
+			x += slopes[i].first;
+			y += slopes[i].second;
 		}
-		x += 3;
+
+		sums.push_back(result);
+	}
+
+	result = sums[0];
+
+	for (uint32_t i = 1; i < sums.size(); i++) {
+		result *= sums[i];
 	}
 
 	return result;
@@ -54,18 +76,21 @@ void AoC2020_day03::tests() {
 
 	if (init({"..##.......", "#...#...#..", ".#....#..#.", "..#.#...#.#", ".#...##..#.", "..#.##.....", ".#.#.#....#", ".#........#", "#.##...#...",
 			  "#...##....#", ".#..#...#.#"})) {
-		result = get_tree_count_by_3_1_slope(); // 7
+		result = get_tree_count_by_slopes(false); // 7
+		result = get_tree_count_by_slopes(true);  // 336
 	}
 }
 
 bool AoC2020_day03::part1() {
 
-	result1_ = std::to_string(get_tree_count_by_3_1_slope());
+	result1_ = std::to_string(get_tree_count_by_slopes(false));
 
 	return true;
 }
 
 bool AoC2020_day03::part2() {
+
+	result2_ = std::to_string(get_tree_count_by_slopes(true));
 
 	return true;
 }
