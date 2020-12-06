@@ -96,7 +96,7 @@ bool AoC2020_day03::part2() {
 }
 
 int32_t AoC2020_day03::get_aoc_day() {
-	return 2;
+	return 3;
 }
 
 int32_t AoC2020_day03::get_aoc_year() {
