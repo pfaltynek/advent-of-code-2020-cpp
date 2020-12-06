@@ -1,2 +1,2 @@
 part1:	801
-part2:	
+part2:	597

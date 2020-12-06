@@ -15,8 +15,10 @@ class AoC2020_day05 : public AoC {
 
   private:
 	std::vector<std::pair<uint8_t, uint8_t>> boarding_passes_;
+	std::vector<uint32_t> seat_ids_;
 	uint8_t decode_binary(const std::string binary_string);
 	uint32_t get_highest_seat_id();
+	uint32_t get_my_seat_id();
 };
 
 bool AoC2020_day05::init(const std::vector<std::string> lines) {
@@ -53,15 +55,31 @@ uint8_t AoC2020_day05::decode_binary(const std::string binary_string) {
 uint32_t AoC2020_day05::get_highest_seat_id() {
 	uint32_t result = 0, tmp;
 
+	seat_ids_.clear();
+
 	for (size_t i = 0; i < boarding_passes_.size(); i++) {
 		tmp = boarding_passes_[i].first * 8 + boarding_passes_[i].second;
 
 		if (tmp > result) {
 			result = tmp;
 		}
+
+		seat_ids_.push_back(tmp);
 	}
 
 	return result;
+}
+
+uint32_t AoC2020_day05::get_my_seat_id() {
+	std::sort(seat_ids_.begin(), seat_ids_.end());
+
+	for (size_t i = 1; i < seat_ids_.size(); i++)	{
+		if (seat_ids_[i] - seat_ids_[i-1] == 2) {
+			return seat_ids_[i] - 1;
+		}
+	}
+
+	return 0;
 }
 
 void AoC2020_day05::tests() {
@@ -89,7 +107,7 @@ bool AoC2020_day05::part1() {
 
 bool AoC2020_day05::part2() {
 
-	//result2_ = std::to_string(get_valid_passports_count(true));
+	result2_ = std::to_string(get_my_seat_id());
 
 	return true;
 }
