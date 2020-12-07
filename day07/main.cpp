@@ -20,9 +20,10 @@ class AoC2020_day07 : public AoC {
 	int32_t get_aoc_year();
 
   private:
-	std::vector<std::pair<std::string, std::map<std::string, uint8_t>>> bags_;
+	std::map<std::string, std::map<std::string, uint32_t>> bags_;
 	std::map<std::string, std::vector<std::string>> bags_reverse_;
 	uint32_t get_colors_count();
+	uint64_t get_bags_count(const std::string color);
 };
 
 bool AoC2020_day07::init(const std::vector<std::string> lines) {
@@ -30,7 +31,7 @@ bool AoC2020_day07::init(const std::vector<std::string> lines) {
 	std::smatch sm;
 	std::string color, content;
 	std::vector<std::string> bags;
-	std::map<std::string, uint8_t> content_map;
+	std::map<std::string, uint32_t> content_map;
 
 	bags_.clear();
 	bags_reverse_.clear();
@@ -41,7 +42,7 @@ bool AoC2020_day07::init(const std::vector<std::string> lines) {
 			content = sm.str(2);
 
 			if (std::regex_match(content, sm, BAGS_NO_CONTENT_RULE)) {
-				bags_.push_back({color, {}});
+				bags_[color] = {};
 			} else {
 				bags = split(content, ", ");
 				content_map = {};
@@ -61,7 +62,7 @@ bool AoC2020_day07::init(const std::vector<std::string> lines) {
 					}
 				}
 
-				bags_.push_back({color, content_map});
+				bags_[color] = content_map;
 			}
 		} else {
 			std::cout << "Invalid rule at line " << i + 1 << std::endl;
@@ -101,15 +102,29 @@ uint32_t AoC2020_day07::get_colors_count() {
 	return map_bags.size();
 }
 
+uint64_t AoC2020_day07::get_bags_count(const std::string color) {
+	uint64_t result = 0, tmp;
+
+	for (auto it = bags_[color].begin(); it != bags_[color].end(); it++) {
+		tmp = get_bags_count(it->first);
+		result += it->second * tmp;
+		result += it->second;
+	}
+
+	return result;
+}
+
 void AoC2020_day07::tests() {
 	uint32_t result;
+	uint64_t result2;
 
 	if (init({"light red bags contain 1 bright white bag, 2 muted yellow bags.", "dark orange bags contain 3 bright white bags, 4 muted yellow bags.",
 			  "bright white bags contain 1 shiny gold bag.", "muted yellow bags contain 2 shiny gold bags, 9 faded blue bags.",
 			  "shiny gold bags contain 1 dark olive bag, 2 vibrant plum bags.", "dark olive bags contain 3 faded blue bags, 4 dotted black bags.",
 			  "vibrant plum bags contain 5 faded blue bags, 6 dotted black bags.", "faded blue bags contain no other bags.",
 			  "dotted black bags contain no other bags."})) {
-		result = get_colors_count(); // 4
+		result = get_colors_count();			// 4
+		result2 = get_bags_count(MY_BAG_COLOR); // 126
 	}
 }
 
@@ -122,7 +137,7 @@ bool AoC2020_day07::part1() {
 
 bool AoC2020_day07::part2() {
 
-	result2_ = std::to_string(get_colors_count());
+	result2_ = std::to_string(get_bags_count(MY_BAG_COLOR));
 
 	return true;
 }
