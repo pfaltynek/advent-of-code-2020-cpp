@@ -12,7 +12,9 @@ class AoC2020_day09 : public AoC {
 
   private:
 	std::vector<uint64_t> xmas_;
+	uint64_t rule_breakning_number_;
 	uint64_t get_rule_breaking_number(const uint32_t preamble_size);
+	uint64_t get_encryption_weakness();
 };
 
 bool AoC2020_day09::init(const std::vector<std::string> lines) {
@@ -39,13 +41,14 @@ uint64_t AoC2020_day09::get_rule_breaking_number(const uint32_t preamble_size) {
 					break;
 				}
 			}
-			
+
 			if (rule_fulfilled) {
 				break;
 			}
 		}
 
 		if (!rule_fulfilled) {
+			rule_breakning_number_ = xmas_[i];
 			return xmas_[i];
 		}
 	}
@@ -53,11 +56,39 @@ uint64_t AoC2020_day09::get_rule_breaking_number(const uint32_t preamble_size) {
 	return 0;
 }
 
+uint64_t AoC2020_day09::get_encryption_weakness() {
+	uint64_t sum = 0, min = UINT64_MAX, max = 0;
+	uint32_t idx = 0, count = 0;
+
+	while (true) {
+		sum += xmas_[idx + count];
+
+		if (min > xmas_[idx + count]) {
+			min = xmas_[idx + count];
+		}
+
+		if (max < xmas_[idx + count]) {
+			max = xmas_[idx + count];
+		}
+
+		if (sum == rule_breakning_number_) {
+			return min + max;
+		} else if (sum > rule_breakning_number_) {
+			idx++;
+			min = UINT64_MAX;
+			max = sum = count = 0;
+		} else {
+			count++;
+		}
+	}
+}
+
 void AoC2020_day09::tests() {
 	int64_t result;
 
 	if (init({"35", "20", "15", "25", "47", "40", "62", "55", "65", "95", "102", "117", "150", "182", "127", "219", "299", "277", "309", "576"})) {
 		result = get_rule_breaking_number(5); // 127
+		result = get_encryption_weakness();	  // 62
 	}
 }
 
@@ -70,7 +101,7 @@ bool AoC2020_day09::part1() {
 
 bool AoC2020_day09::part2() {
 
-	// result2_ = std::to_string();
+	result2_ = std::to_string(get_encryption_weakness());
 
 	return true;
 }
