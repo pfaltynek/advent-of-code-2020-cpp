@@ -1,8 +1,8 @@
 #ifndef COORD_HPP
 #define COORD_HPP
 
-#include <stdint.h>
 #include <algorithm>
+#include <stdint.h>
 
 typedef struct COORD2D {
 	int32_t x, y;
@@ -34,6 +34,10 @@ const coord_str coord_step_north = {0, -1};
 const coord_str coord_step_south = {0, 1};
 const coord_str coord_step_west = {-1, 0};
 const coord_str coord_step_east = {1, 0};
+const coord_str coord_step_north_east = {1, -1};
+const coord_str coord_step_south_east = {1, 1};
+const coord_str coord_step_north_west = {-1, -1};
+const coord_str coord_step_south_west = {-1, 1};
 
 typedef struct COORD3D {
 	int32_t x, y, z;
