@@ -6,6 +6,10 @@
 const std::vector<coord_str> ADJACENTS = {coord_step_north, coord_step_north_east, coord_step_east, coord_step_south_east,
 										  coord_step_south, coord_step_south_west, coord_step_west, coord_step_north_west};
 
+const char FLOOR = '.';
+const char SEAT_EMPTY = 'L';
+const char SEAT_OCCUPIED = '#';
+
 class AoC2020_day11 : public AoC {
   protected:
 	bool init(const std::vector<std::string> lines);
@@ -16,9 +20,10 @@ class AoC2020_day11 : public AoC {
 	int32_t get_aoc_year();
 
   private:
-	std::map<coord_str, bool> seats_;
-	uint32_t get_stable_occupied_count();
-	uint8_t get_adjacent_occupied_count(coord_str position);
+	std::map<coord_str, char> seats_;
+	uint32_t get_stable_occupied_count(const bool part2 = false);
+	uint8_t get_adjacent_occupied_count(std::map<coord_str, char>& seats, coord_str position);
+	uint8_t get_first_adjacent_seat_occupied_count(std::map<coord_str, char>& seats, coord_str position);
 };
 
 bool AoC2020_day11::init(const std::vector<std::string> lines) {
@@ -36,14 +41,10 @@ bool AoC2020_day11::init(const std::vector<std::string> lines) {
 		}
 		for (uint32_t j = 0; j < lines[i].size(); j++) {
 			switch (lines[i][j]) {
-				case '.':
-					// do not store
-					break;
-				case '#':
-					seats_[{static_cast<int32_t>(j), static_cast<int32_t>(i)}] = true;
-					break;
-				case 'L':
-					seats_[{static_cast<int32_t>(j), static_cast<int32_t>(i)}] = false;
+				case FLOOR:
+				case SEAT_OCCUPIED:
+				case SEAT_EMPTY:
+					seats_[{static_cast<int32_t>(j), static_cast<int32_t>(i)}] = lines[i][j];
 					break;
 				default:
 					std::cout << "Unknow symbol at position " << j + 1 << " of line " << i + 1 << std::endl;
@@ -55,14 +56,40 @@ bool AoC2020_day11::init(const std::vector<std::string> lines) {
 	return true;
 }
 
-uint8_t AoC2020_day11::get_adjacent_occupied_count(coord_str position) {
+uint8_t AoC2020_day11::get_first_adjacent_seat_occupied_count(std::map<coord_str, char>& seats, coord_str position) {
+	uint8_t result = 0;
+	coord_str tmp;
+
+	for (size_t i = 0; i < ADJACENTS.size(); i++) {
+		tmp = position;
+
+		do {
+			tmp = tmp + ADJACENTS[i];
+
+			if (!seats.count(tmp)) {
+				break;
+			} else if (seats[tmp] == FLOOR) {
+				continue;
+			} else {
+				if (seats[tmp] == SEAT_OCCUPIED) {
+					result++;
+				}
+				break;
+			}
+		} while (true);
+	}
+
+	return result;
+}
+
+uint8_t AoC2020_day11::get_adjacent_occupied_count(std::map<coord_str, char>& seats, coord_str position) {
 	uint8_t result = 0;
 	coord_str tmp;
 
 	for (size_t i = 0; i < ADJACENTS.size(); i++) {
 		tmp = position + ADJACENTS[i];
-		if (seats_.count(tmp)) {
-			if (seats_[tmp]) {
+		if (seats.count(tmp)) {
+			if (seats[tmp] == SEAT_OCCUPIED) {
 				result++;
 			}
 		}
@@ -71,39 +98,56 @@ uint8_t AoC2020_day11::get_adjacent_occupied_count(coord_str position) {
 	return result;
 }
 
-uint32_t AoC2020_day11::get_stable_occupied_count() {
+uint32_t AoC2020_day11::get_stable_occupied_count(const bool part2) {
 	uint32_t result = 0;
-	bool modified = true, new_state;
-	std::map<coord_str, bool> next;
-	uint8_t adjacents;
+	bool modified = true;
+	char new_state;
+	std::map<coord_str, char> next, seats;
+	uint8_t adjacents, adjacents_limit;
+
+	seats = seats_;
+
+	if (part2) {
+		adjacents_limit = 5;
+	} else {
+		adjacents_limit = 4;
+	}
 
 	while (modified) {
 		modified = false;
 		next.clear();
 
-		for (auto it = seats_.begin(); it != seats_.end(); it++) {
-			adjacents = get_adjacent_occupied_count(it->first);
+		for (auto it = seats.begin(); it != seats.end(); it++) {
+			if (part2) {
+				adjacents = get_first_adjacent_seat_occupied_count(seats, it->first);
+			} else {
+				adjacents = get_adjacent_occupied_count(seats, it->first);
+			}
 
 			new_state = it->second;
-			if (it->second) {
-				if (adjacents >= 4) {
-					new_state = false;
-					modified = true;
-				}
-			} else {
-				if (adjacents == 0) {
-					new_state = true;
-					modified = true;
-				}
+			switch (it->second) {
+				case SEAT_OCCUPIED:
+					if (adjacents >= adjacents_limit) {
+						new_state = SEAT_EMPTY;
+						modified = true;
+					}
+					break;
+				case SEAT_EMPTY:
+					if (adjacents == 0) {
+						new_state = SEAT_OCCUPIED;
+						modified = true;
+					}
+					break;
 			}
+
 			next[it->first] = new_state;
 		}
 
-		seats_.swap(next);
+		seats.swap(next);
 	}
 
-	for (auto it = seats_.begin(); it != seats_.end(); it++) {
-		if (it->second) {
+	for (auto it = seats.begin(); it != seats.end(); it++) {
+		if (it->second == SEAT_OCCUPIED) {
 			result++;
 		}
 	}
@@ -115,7 +159,8 @@ void AoC2020_day11::tests() {
 	uint32_t result;
 
 	if (init({"L.LL.LL.LL", "LLLLLLL.LL", "L.L.L..L..", "LLLL.LL.LL", "L.LL.LL.LL", "L.LLLLL.LL", "..L.L.....", "LLLLLLLLLL", "L.LLLLLL.L", "L.LLLLL.LL"})) {
-		result = get_stable_occupied_count();
+		result = get_stable_occupied_count();	  // 37
+		result = get_stable_occupied_count(true); // 26
 	}
 }
 
@@ -128,7 +173,7 @@ bool AoC2020_day11::part1() {
 
 bool AoC2020_day11::part2() {
 
-	// result2_ = std::to_string();
+	result2_ = std::to_string(get_stable_occupied_count(true));
 
 	return true;
 }
