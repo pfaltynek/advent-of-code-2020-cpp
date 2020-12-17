@@ -21,6 +21,7 @@ class AoC2020_day12 : public AoC {
   private:
 	std::vector<std::pair<instruction_t, uint32_t>> instructions_;
 	uint32_t get_route_end_manhattan_distance();
+	uint32_t get_waypoint_route_end_manhattan_distance();
 };
 
 bool AoC2020_day12::init(const std::vector<std::string> lines) {
@@ -115,11 +116,75 @@ uint32_t AoC2020_day12::get_route_end_manhattan_distance() {
 	return abs(pos.x) + abs(pos.y);
 }
 
+uint32_t AoC2020_day12::get_waypoint_route_end_manhattan_distance() {
+	coord_str wp = {10, -1}, pos, tmp;
+
+	for (size_t i = 0; i < instructions_.size(); i++) {
+		switch (instructions_[i].first) {
+			case instruction_t::forward:
+				pos.x += (wp.x * instructions_[i].second);
+				pos.y += (wp.y * instructions_[i].second);
+				break;
+			case instruction_t::right:
+				switch ((instructions_[i].second % 360) / 90) {
+					case 0:
+						break;
+					case 1:
+						std::swap(wp.x, wp.y);
+						wp.x = -wp.x;
+						break;
+					case 2:
+						wp.x = -wp.x;
+						wp.y = -wp.y;
+						break;
+					case 3:
+						std::swap(wp.x, wp.y);
+						wp.y = -wp.y;
+						break;
+				}
+				break;
+			case instruction_t::left:
+				switch ((instructions_[i].second % 360) / 90) {
+					case 0:
+						break;
+					case 3:
+						std::swap(wp.x, wp.y);
+						wp.x = -wp.x;
+						break;
+					case 2:
+						wp.x = -wp.x;
+						wp.y = -wp.y;
+						break;
+					case 1:
+						std::swap(wp.x, wp.y);
+						wp.y = -wp.y;
+						break;
+				}
+				break;
+			case instruction_t::north:
+				wp.y -= instructions_[i].second;
+				break;
+			case instruction_t::south:
+				wp.y += instructions_[i].second;
+				break;
+			case instruction_t::east:
+				wp.x += instructions_[i].second;
+				break;
+			case instruction_t::west:
+				wp.x -= instructions_[i].second;
+				break;
+		}
+	}
+
+	return abs(pos.x) + abs(pos.y);
+}
+
 void AoC2020_day12::tests() {
 	uint32_t result;
 
 	if (init({"F10", "N3", "F7", "R90", "F11"})) {
-		result = get_route_end_manhattan_distance();
+		result = get_route_end_manhattan_distance(); // 25
+		result = get_waypoint_route_end_manhattan_distance(); // 286
 	}
 }
 
@@ -132,7 +197,7 @@ bool AoC2020_day12::part1() {
 
 bool AoC2020_day12::part2() {
 
-	// result2_ = std::to_string();
+	result2_ = std::to_string(get_waypoint_route_end_manhattan_distance());
 
 	return true;
 }
