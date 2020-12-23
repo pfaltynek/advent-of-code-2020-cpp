@@ -19,6 +19,7 @@ class AoC2020_day14 : public AoC {
   private:
 	std::vector<std::pair<bool, std::pair<uint64_t, uint64_t>>> instructions_;
 	uint64_t get_final_mem_sum();
+	uint64_t get_final_mem_sum_with_floating_addressing();
 };
 
 bool AoC2020_day14::init(const std::vector<std::string> lines) {
@@ -92,11 +93,53 @@ uint64_t AoC2020_day14::get_final_mem_sum() {
 	return result;
 }
 
+uint64_t AoC2020_day14::get_final_mem_sum_with_floating_addressing() {
+	uint64_t result = 0, floating = 0, preset = 0, shift;
+	std::map<uint64_t, uint64_t> memory = {};
+	std::vector<uint64_t> addrs, tmp;
+
+	for (size_t i = 0; i < instructions_.size(); i++) {
+		if (instructions_[i].first) {
+			floating = instructions_[i].second.first;
+			preset = instructions_[i].second.second;
+		} else {
+			addrs = {(instructions_[i].second.first | preset) & (~floating)};
+			shift = 1;
+
+			for (size_t j = 0; j < 36; j++) {
+				if (floating & shift) {
+					tmp = addrs;
+					for (size_t a = 0; a < tmp.size(); a++) {
+						tmp[a] |= shift;
+					}
+					addrs.insert(addrs.end(), tmp.begin(), tmp.end());
+				}
+				shift = shift << 1;
+			}
+
+			for (size_t j = 0; j < addrs.size(); j++)
+			{
+				memory[addrs[j]] = instructions_[i].second.second;
+			}
+		}
+	}
+
+	for (auto it = memory.begin(); it != memory.end(); it++) {
+		result += it->second;
+	}
+
+	return result;
+}
+
 void AoC2020_day14::tests() {
 	uint64_t result;
 
 	if (init({"mask = XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X", "mem[8] = 11", "mem[7] = 101", "mem[8] = 0"})) {
 		result = get_final_mem_sum(); // 165
+	}
+
+	if (init({"mask = 000000000000000000000000000000X1001X", "mem[42] = 100", "mask = 00000000000000000000000000000000X0XX", "mem[26] = 1"})) {
+		result = get_final_mem_sum_with_floating_addressing(); // 208
 	}
 }
 
@@ -109,7 +152,7 @@ bool AoC2020_day14::part1() {
 
 bool AoC2020_day14::part2() {
 
-	// result2_ = std::to_string();
+	result2_ = std::to_string(get_final_mem_sum_with_floating_addressing());
 
 	return true;
 }
