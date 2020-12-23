@@ -3,6 +3,9 @@
 #include <map>
 #include <string>
 
+const uint32_t PART1_TURNS = 2020;
+const uint32_t PART2_TURNS = 30000000;
+
 class AoC2020_day15 : public AoC {
   protected:
 	bool init(const std::vector<std::string> lines);
@@ -37,23 +40,31 @@ bool AoC2020_day15::init(const std::vector<std::string> lines) {
 }
 
 uint32_t AoC2020_day15::simulate_game(uint32_t turns) {
-	uint32_t turn = 0, last_spoken;
-	std::map<uint32_t, std::vector<uint32_t>> spoken = {};
+	uint32_t turn = 1, last_spoken;
+	std::vector<uint32_t> last(turns), prev(turns);
 
 	for (size_t i = 0; i < starting_nums_.size(); i++) {
 		last_spoken = starting_nums_[i];
-		spoken[last_spoken].insert(spoken[last_spoken].begin(), turn);
+
+		if (last[last_spoken]) {
+			prev[last_spoken] = last[last_spoken];
+		}
+		last[last_spoken] = turn;
 		turn++;
 	}
 
-	while (turn < turns) {
-		if (spoken[last_spoken].size() > 1) {
-			last_spoken = spoken[last_spoken][0] - spoken[last_spoken][1];
-
+	while (turn <= turns) {
+		if (prev[last_spoken]) {
+			last_spoken = last[last_spoken] - prev[last_spoken];
 		} else {
 			last_spoken = 0;
 		}
-		spoken[last_spoken].insert(spoken[last_spoken].begin(), turn);
+
+		if (last[last_spoken]) {
+			prev[last_spoken] = last[last_spoken];
+		}
+
+		last[last_spoken] = turn;
 		turn++;
 	}
 
@@ -64,38 +75,45 @@ void AoC2020_day15::tests() {
 	uint64_t result;
 
 	if (init({"0,3,6"})) {
-		result = simulate_game(2020); // 436
+		result = simulate_game(PART1_TURNS); // 436
+		result = simulate_game(PART2_TURNS); // 175594
 	}
 	if (init({"1,3,2"})) {
-		result = simulate_game(2020); // 1.
+		result = simulate_game(PART1_TURNS); // 1
+		result = simulate_game(PART2_TURNS); // 2578
 	}
 	if (init({"2,1,3"})) {
-		result = simulate_game(2020); // 10.
+		result = simulate_game(PART1_TURNS); // 10
+		result = simulate_game(PART2_TURNS); // 3544142
 	}
 	if (init({"1,2,3"})) {
-		result = simulate_game(2020); // 27.
+		result = simulate_game(PART1_TURNS); // 27
+		result = simulate_game(PART2_TURNS); // 261214
 	}
 	if (init({"2,3,1"})) {
-		result = simulate_game(2020); // 78.
+		result = simulate_game(PART1_TURNS); // 78
+		result = simulate_game(PART2_TURNS); // 6895259
 	}
 	if (init({"3,2,1"})) {
-		result = simulate_game(2020); // 438.
+		result = simulate_game(PART1_TURNS); // 438
+		result = simulate_game(PART2_TURNS); // 18
 	}
 	if (init({"3,1,2"})) {
-		result = simulate_game(2020); // 1836.
+		result = simulate_game(PART1_TURNS); // 1836
+		result = simulate_game(PART2_TURNS); // 362
 	}
 }
 
 bool AoC2020_day15::part1() {
 
-	result1_ = std::to_string(simulate_game(2020));
+	result1_ = std::to_string(simulate_game(PART1_TURNS));
 
 	return true;
 }
 
 bool AoC2020_day15::part2() {
 
-	// result2_ = std::to_string();
+	result2_ = std::to_string(simulate_game(PART2_TURNS));
 
 	return true;
 }
