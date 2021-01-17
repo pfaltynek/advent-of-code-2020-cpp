@@ -71,4 +71,33 @@ typedef struct COORD3D {
 	}
 } coord_3d_str;
 
+const coord_3d_str coord_step_north_front = {0, -1, -1};
+const coord_3d_str coord_step_south_front = {0, 1, -1};
+const coord_3d_str coord_step_west_front = {-1, 0, -1};
+const coord_3d_str coord_step_east_front = {1, 0, -1};
+const coord_3d_str coord_step_front = {0, 0, -1};
+const coord_3d_str coord_step_north_east_front = {1, -1, -1};
+const coord_3d_str coord_step_south_east_front = {1, 1, -1};
+const coord_3d_str coord_step_north_west_front = {-1, -1, -1};
+const coord_3d_str coord_step_south_west_front = {-1, 1, -1};
+
+const coord_3d_str coord_step_north_rear = {0, -1, 1};
+const coord_3d_str coord_step_south_rear = {0, 1, 1};
+const coord_3d_str coord_step_west_rear = {-1, 0, 1};
+const coord_3d_str coord_step_east_rear = {1, 0, 1};
+const coord_3d_str coord_step_rear = {0, 0, 1};
+const coord_3d_str coord_step_north_east_rear = {1, -1, 1};
+const coord_3d_str coord_step_south_east_rear = {1, 1, 1};
+const coord_3d_str coord_step_north_west_rear = {-1, -1, 1};
+const coord_3d_str coord_step_south_west_rear = {-1, 1, 1};
+
+const coord_3d_str coord_step_north_center = {0, -1, 0};
+const coord_3d_str coord_step_south_center = {0, 1, 0};
+const coord_3d_str coord_step_west_center = {-1, 0, 0};
+const coord_3d_str coord_step_east_center = {1, 0, 0};
+const coord_3d_str coord_step_north_east_center = {1, -1, 0};
+const coord_3d_str coord_step_south_east_center = {1, 1, 0};
+const coord_3d_str coord_step_north_west_center = {-1, -1, 0};
+const coord_3d_str coord_step_south_west_center = {-1, 1, 0};
+
 #endif // COORD_HPP
