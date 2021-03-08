@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <sstream>
 
 std::vector<std::string> split(std::string to_split, const std::string &delimiter) {
 	std::vector<std::string> result;
@@ -22,4 +23,21 @@ std::vector<std::string> split(std::string to_split, const std::string &delimite
 	}
 
 	return result;
+}
+
+std::string join(const std::vector<std::string> to_join, const std::string delimiter) {
+	std::stringstream ss;
+
+	ss.clear();
+
+	if (to_join.size()) {
+		ss << to_join[0];
+	}
+
+	for (size_t i = 1; i < to_join.size(); i++)
+	{
+		ss << delimiter << to_join[i];
+	}
+
+	return ss.str();
 }

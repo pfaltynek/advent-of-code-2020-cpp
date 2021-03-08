@@ -20,12 +20,14 @@ class AoC2020_day21 : public AoC {
 	std::vector<std::pair<std::vector<std::string>, std::vector<std::string>>> foods_;
 	std::map<std::string, std::vector<uint32_t>> allergens_in_food_map_;
 	std::map<std::string, std::string> allergens_identified_;
+	std::vector<std::string> allergens_list_;
 	uint64_t get_ingredients_without_allergens_count();
 	void find_common_ingredients(const std::vector<std::string>& ingredients1, const std::vector<std::string>& ingredients2, std::vector<std::string>& common);
 	void remove_identified_allergens_from_ingredients(std::vector<std::string>& allergens, std::vector<std::string>& ingredients,
 													  std::vector<std::string>& result);
 	void identify_all_allergens();
 	uint64_t count_ingredients_without_allergen();
+	std::string canonical_dangerous_ingredient_list();
 };
 
 bool AoC2020_day21::init(const std::vector<std::string> lines) {
@@ -78,9 +80,10 @@ void AoC2020_day21::remove_identified_allergens_from_ingredients(std::vector<std
 }
 
 void AoC2020_day21::identify_all_allergens() {
-	std::vector<std::string> common, allergens_list = {}, tmp;
+	std::vector<std::string> common, tmp;
 
 	allergens_identified_.clear();
+	allergens_list_.clear();
 
 	// identify all allergens
 	while (allergens_identified_.size() < allergens_in_food_map_.size()) {
@@ -93,7 +96,7 @@ void AoC2020_day21::identify_all_allergens() {
 				common = foods_[it->second[0]].first;
 
 				// remove all ingedients identified as allergens
-				remove_identified_allergens_from_ingredients(allergens_list, common, tmp);
+				remove_identified_allergens_from_ingredients(allergens_list_, common, tmp);
 				tmp.swap(common);
 			} else { // allergen contained in more foods
 				common = foods_[it->second[0]].first;
@@ -103,44 +106,59 @@ void AoC2020_day21::identify_all_allergens() {
 					tmp.swap(common);
 				}
 
-				remove_identified_allergens_from_ingredients(allergens_list, common, tmp);
+				remove_identified_allergens_from_ingredients(allergens_list_, common, tmp);
 				tmp.swap(common);
 			}
 			// if there is only one ingredient contained in all foods then it is allergen
 			if (common.size() == 1) {
 				allergens_identified_[it->first] = common[0];
-				allergens_list.push_back(common[0]);
-				std::sort(allergens_list.begin(), allergens_list.end());
+				allergens_list_.push_back(common[0]);
+				std::sort(allergens_list_.begin(), allergens_list_.end());
 			}
 		}
 	}
 }
 
 uint64_t AoC2020_day21::count_ingredients_without_allergen() {
-	std::vector<std::string> allergens = {}, tmp = {};
+	std::vector<std::string> tmp = {};
 	uint64_t result = 0;
 
-	for (auto it = allergens_identified_.begin(); it != allergens_identified_.end(); it++) {
-		allergens.push_back(it->second);
-	}
-
-	std::sort(allergens.begin(), allergens.end());
+	std::sort(allergens_list_.begin(), allergens_list_.end());
 
 	for (size_t i = 0; i < foods_.size(); i++) {
-		remove_identified_allergens_from_ingredients(allergens, foods_[i].first, tmp);
+		remove_identified_allergens_from_ingredients(allergens_list_, foods_[i].first, tmp);
 		result += tmp.size();
 	}
 
 	return result;
 }
 
+std::string AoC2020_day21::canonical_dangerous_ingredient_list() {
+	std::vector<std::string> allergens = {}, ingredients = {};
+
+	for (auto it = allergens_identified_.begin(); it != allergens_identified_.end(); it++) {
+		allergens.push_back(it->first);
+	}
+
+	std::sort(allergens.begin(), allergens.end());
+
+	for (size_t i = 0; i < allergens.size(); i++) {
+		ingredients.push_back(allergens_identified_[allergens[i]]);
+	}
+
+	return join(ingredients, ",");
+}
+
 void AoC2020_day21::tests() {
 	uint64_t result;
+	std::string result2;
 
 	if (init({"mxmxvkd kfcds sqjhc nhms (contains dairy, fish)", "trh fvjkl sbzzf mxmxvkd (contains dairy)", "sqjhc fvjkl (contains soy)",
 			  "sqjhc mxmxvkd sbzzf (contains fish)"})) {
 		identify_all_allergens();
 		result = count_ingredients_without_allergen(); // 5
+
+		result2 = canonical_dangerous_ingredient_list(); // "mxmxvkd,sqjhc,fvjkl"
 	}
 }
 
@@ -155,7 +173,7 @@ bool AoC2020_day21::part1() {
 
 bool AoC2020_day21::part2() {
 
-	result2_ = std::to_string(0);
+	result2_ = canonical_dangerous_ingredient_list();
 
 	return true;
 }
