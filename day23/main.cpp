@@ -1,7 +1,15 @@
 #include "./../common/aoc.hpp"
 #include <algorithm>
+#include <map>
 #include <set>
 #include <string>
+
+const uint32_t C_PART2_CUPS_COUNT = 1000000;
+
+typedef struct CUP {
+	uint32_t value;
+	CUP* pnext;
+} cup_str;
 
 class AoC2020_day23 : public AoC {
   protected:
@@ -14,7 +22,11 @@ class AoC2020_day23 : public AoC {
 
   private:
 	std::vector<uint8_t> cups_;
-	uint64_t perform_crab_moves(const uint16_t moves_count);
+	uint64_t perform_crab_moves(const bool part2, const uint32_t moves_count);
+	void build_cups_map(const uint32_t max = 0);
+	cup_str* current_;
+	std::map<uint32_t, cup_str> cups_map_;
+	uint32_t min_, max_;
 };
 
 bool AoC2020_day23::init(const std::vector<std::string> lines) {
@@ -32,54 +44,91 @@ bool AoC2020_day23::init(const std::vector<std::string> lines) {
 		}
 	}
 
+	min_ = *std::min_element(cups_.begin(), cups_.end());
+	max_ = *std::max_element(cups_.begin(), cups_.end());
+
 	return true;
 }
 
-uint64_t AoC2020_day23::perform_crab_moves(const uint16_t moves_count) {
-	std::vector<uint8_t> tmp, cups;
-	std::vector<uint8_t>::iterator it;
-	uint16_t next_val;
-	uint8_t min, max;
+void AoC2020_day23::build_cups_map(const uint32_t max) {
+	cup_str cup;
+	cup_str *pcup, *pstart;
+
+	cups_map_.clear();
+
+	cup.value = cups_[0];
+	cups_map_[cups_[0]] = cup;
+	pcup = pstart = &cups_map_[cups_[0]];
+
+	for (size_t i = 1; i < cups_.size(); i++) {
+		cup.value = cups_[i];
+		cups_map_[cups_[i]] = cup;
+		pcup->pnext = &cups_map_[cups_[i]];
+		pcup = &cups_map_[cups_[i]];
+	}
+
+	for (size_t i = max_ + 1; i <= max; i++) {
+		cup.value = i;
+		cups_map_[i] = cup;
+		pcup->pnext = &cups_map_[i];
+		pcup = &cups_map_[i];
+		max_ = i;
+	}
+
+	pcup->pnext = pstart;
+	current_ = pstart;
+}
+
+uint64_t AoC2020_day23::perform_crab_moves(const bool part2, const uint32_t moves_count) {
+	cup_str *first, *last;
+	uint32_t next_val;
 	uint64_t result;
+	std::set<uint32_t> moving;
 
-	if (!cups_.size()) {
-		return 0;
+	if (part2) {
+		build_cups_map(C_PART2_CUPS_COUNT);
+	} else {
+		build_cups_map();
 	}
 
-	cups = cups_;
+	for (size_t i = 0; i < moves_count; i++) {
+		first = current_->pnext;
+		last = first->pnext->pnext;
 
-	min = *std::min_element(cups.begin(), cups.end());
-	max = *std::max_element(cups.begin(), cups.end());
+		moving.clear();
+		moving.emplace(first->value);
+		moving.emplace(first->pnext->value);
+		moving.emplace(first->pnext->pnext->value);
 
-	for (uint8_t i = 0; i < moves_count; i++) {
-		tmp.clear();
-		tmp.insert(tmp.begin(), cups.begin() + 1, cups.begin() + 4);
-		cups.erase(cups.begin() + 1, cups.begin() + 4);
+		next_val = current_->value;
 
-		next_val = cups[0] - 1;
+		do {
+			next_val--;
 
-		while ((it = std::find(cups.begin(), cups.end(), next_val)) == cups.end()) {
-			if (next_val < min) {
-				next_val = max;
-			} else {
-				next_val--;
+			if (next_val < min_) {
+				next_val = max_;
 			}
+		} while (moving.count(next_val));
+
+		current_->pnext = last->pnext;
+		last->pnext = cups_map_[next_val].pnext;
+		cups_map_[next_val].pnext = first;
+
+		current_ = current_->pnext;
+	}
+
+	first = cups_map_[1].pnext;
+
+	if (part2) {
+		result = first->value;
+		result *= first->pnext->value;
+	} else {
+		result = 0;
+
+		while (first->value != 1) {
+			result = (result * 10) + first->value;
+			first = first->pnext;
 		}
-
-		cups.insert(it + 1, tmp.begin(), tmp.end());
-		cups.push_back(cups.front());
-		cups.erase(cups.begin());
-	}
-
-	while (cups.front() != 1) {
-		cups.push_back(cups.front());
-		cups.erase(cups.begin());
-	}
-
-	result = 0;
-
-	for (uint8_t i = 1; i < cups.size(); i++) {
-		result = (result * 10) + cups[i];
 	}
 
 	return result;
@@ -89,21 +138,23 @@ void AoC2020_day23::tests() {
 	uint64_t result;
 
 	if (init({"389125467"})) {
-		result = perform_crab_moves(10); // 92658374
-		result = perform_crab_moves(100); // 67384529
+		result = perform_crab_moves(false, 10);	 // 92658374
+		result = perform_crab_moves(false, 100); // 67384529
+
+		result = perform_crab_moves(true, 10000000); // 149245887792
 	}
 }
 
 bool AoC2020_day23::part1() {
 
-	result1_ = std::to_string(perform_crab_moves(100));
+	result1_ = std::to_string(perform_crab_moves(false, 100));
 
 	return true;
 }
 
 bool AoC2020_day23::part2() {
 
-	result2_ = std::to_string(0);
+	result2_ = std::to_string(perform_crab_moves(true, 10000000));
 
 	return true;
 }
