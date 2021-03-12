@@ -8,8 +8,8 @@
 			"name": "(gdb) Launch",
 			"type": "cppdbg",
 			"request": "launch",
-			"preLaunchTask": "build AoC 2020 day 23",
-			"program": "${workspaceFolder}/aoc-2020-day23",
+			"preLaunchTask": "build AoC 2020 day 24",
+			"program": "${workspaceFolder}/aoc-2020-day24",
 			"linux": {
 				"miDebuggerPath": "gdb"
 			},

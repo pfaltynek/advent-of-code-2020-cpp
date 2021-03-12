@@ -4,11 +4,11 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"label": "build AoC 2020 day 23",
+			"label": "build AoC 2020 day 24",
 			"type": "shell",
 			"command": "g++",
 			"args": [
-				"-g", "-Wall", "main.cpp", "-o", "aoc-2020-day23"
+				"-g", "-Wall", "main.cpp", "-o", "aoc-2020-day24"
 			],
 			"group": {
 				"kind": "build",
